@@ -1,59 +1,39 @@
-# Entregable
+# 📄 Unificador de Documentos y PDF - Frontend (Angular)
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 22.1.7.
+Aplicación web desarrollada en **Angular** que permite a los usuarios seleccionar, organizar, reordenar y combinar múltiples formatos de archivos (**PDF, Word, Excel e Imágenes**) en un único documento PDF unificado.
 
-## Development server
+---
 
-To start a local development server, run:
+## 🚀 Características Principales
 
-```bash
-ng serve
-```
+* **Soporte Multi-formato:** Acepta archivos `.pdf`, `.docx`, `.xlsx`, `.jpg`, `.png`, entre otros.
+* **Gestión Dinámica:** Permite reordenar los archivos cargados (subir/bajar posición) antes de unificar.
+* **Interfaz Personalizable:** Incluye panel de temas (Modo Claro / Modo Noche) e indicadores de carga en tiempo real.
+* **Conexión API REST:** Consume el servicio backend en Spring Boot para realizar la conversión y fusión de documentos.
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+---
 
-## Code scaffolding
+## 🛠️ Tecnologías Utilizadas
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+* **Framework:** Angular (v17+)
+* **Lenguaje:** TypeScript, HTML5, CSS3
+* **Cliente HTTP:** `@angular/common/http` (HttpClient)
 
-```bash
-ng generate component component-name
-```
+---
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+## 🔧 Requisitos Previos
 
-```bash
-ng generate --help
-```
+Asegúrate de contar con lo siguiente instalado en tu equipo:
 
-## Building
+* **Node.js:** v18.x o superior
+* **npm:** v9.x o superior
+* **Angular CLI:** `npm install -g @angular/cli`
 
-To build the project run:
+---
 
-```bash
-ng build
-```
+## 💻 Instrucciones de Ejecución
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
-
-## Running unit tests
-
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
-
-```bash
-ng test
-```
-
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+1. **Clonar el repositorio:**
+   ```bash
+   git clone [https://github.com/SE-p11/frontend-entregable.git](https://github.com/SE-p11/frontend-entregable.git)
+   cd frontend-entregable
