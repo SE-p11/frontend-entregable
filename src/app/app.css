@@ -206,3 +206,44 @@ h1 {
 .btn-primary:not(:disabled) {
   box-shadow: 0 4px 14px rgba(0, 123, 255, 0.35);
 }
+.section-card {
+  background-color: var(--bg-color);
+  border: 1px solid var(--border-color);
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 12px;
+}
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: bold;
+  margin-bottom: 8px;
+}
+.sec-input-title, .sec-textarea {
+  width: 100%;
+  padding: 8px;
+  margin-top: 6px;
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+  background: var(--card-bg);
+  color: var(--text-color);
+  box-sizing: border-box;
+}
+.btn-secondary {
+  background-color: #6c757d;
+  color: white;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+}
+.btn-back {
+  background: transparent;
+  border: none;
+  color: var(--primary-color);
+  font-weight: bold;
+  cursor: pointer;
+  margin-bottom: 15px;
+}

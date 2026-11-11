@@ -1,58 +1,95 @@
 <div class="app-wrapper" [class.dark-theme]="isDarkMode">
-  <!-- Panel Flotante -->
   <div class="theme-panel">
     <div class="color-picker-group">
       <label for="accentColor">Énfasis:</label>
-      <input
-        type="color"
-        id="accentColor"
-        [value]="accentColor"
-        (input)="changeAccentColor($event)">
+      <input type="color" id="accentColor" [value]="accentColor" (input)="changeAccentColor($event)">
     </div>
-
     <button type="button" class="btn-theme" (click)="toggleDarkMode()">
       {{ isDarkMode ? '☀️ Modo Claro' : '🌙 Modo Noche' }}
     </button>
   </div>
 
-  <!-- Tarjeta Principal -->
   <div class="container">
-    <h1>Combinador de Archivos PDF e Imágenes</h1>
-    <p class="subtitle">Selecciona, gestiona y reordena tus archivos antes de unificarlos</p>
+    <h1>Gestor y Combinador de Documentos</h1>
 
-    <div class="upload-section">
-      <input
-        type="file"
-        id="fileInput"
-        class="file-input"
-        (change)="onFileSelected($event)"
-        multiple
-        accept=".pdf, .docx, .doc, .xlsx, .xls, image/*">
-      <label for="fileInput" class="upload-label">
-        <span class="upload-icon">📄</span>
-        <span>Haz clic aquí para seleccionar PDFs, Word, Excel o Imágenes</span>
-      </label>
-    </div>
-
-    <div class="file-list" *ngIf="selectedFiles.length > 0">
-      <div class="file-item" *ngFor="let item of selectedFiles; let i = index">
-        <div class="file-info">
-          <span class="file-name">{{ item.file.name }}</span>
-          <span class="file-size">{{ getFormattedSize(item.file.size) }}</span>
-        </div>
-        <div class="file-actions">
-          <button class="btn-icon" (click)="moveFile(i, 'up')" [disabled]="i === 0">⬆️</button>
-          <button class="btn-icon" (click)="moveFile(i, 'down')" [disabled]="i === selectedFiles.length - 1">⬇️</button>
-          <button class="btn-icon delete" (click)="removeFile(item.id)">🗑️</button>
-        </div>
+    <!-- 1. MENÚ INICIAL -->
+    <div *ngIf="currentMode === 'menu'" class="mode-selection">
+      <p class="subtitle">Selecciona qué deseas realizar:</p>
+      <div class="menu-buttons">
+        <button class="btn-primary" (click)="currentMode = 'combinar'">🗂️ Solo Combinar Archivos (PDF, Word, Excel, Imágenes)</button>
+        <button class="btn-primary" style="margin-top: 15px;" (click)="currentMode = 'plantilla'">📝 Crear Plantilla Editable en Tiempo Real + Adjuntos</button>
       </div>
     </div>
 
-    <button
-      class="btn-primary"
-      (click)="combineAndDownload()"
-      [disabled]="selectedFiles.length === 0 || isProcessing">
-      {{ isProcessing ? '⏳ Unificando documentos...' : '⚡ Unir y Descargar PDF' }}
-    </button>
+    <!-- 2. VISTA DE PLANTILLA EDITABLE EN TIEMPO REAL -->
+    <div *ngIf="currentMode === 'plantilla'">
+      <button class="btn-back" (click)="currentMode = 'menu'">⬅️ Volver al Menú</button>
+      <p class="subtitle">Modifica los títulos y bloques de texto que se generarán en el PDF</p>
+
+      <div class="template-editor-section">
+        <h3>📝 Encabezado General</h3>
+        <div class="form-group">
+          <label>Título Principal:</label>
+          <input type="text" [(ngModel)]="templateData.tituloPrincipal" placeholder="Título del documento">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Autor:</label>
+            <input type="text" [(ngModel)]="templateData.autor" placeholder="Tu nombre">
+          </div>
+          <div class="form-group">
+            <label>Fecha:</label>
+            <input type="date" [(ngModel)]="templateData.fecha">
+          </div>
+        </div>
+
+        <h3 style="margin-top: 20px;">📄 Secciones del Documento (Edición en Tiempo Real)</h3>
+        <div *ngFor="let sec of secciones; let i = index" class="section-card">
+          <div class="section-header">
+            <span>Sección {{ i + 1 }}</span>
+            <button class="btn-icon delete" (click)="eliminarSeccion(sec.id)">🗑️ Eliminar</button>
+          </div>
+          <input type="text" [(ngModel)]="sec.titulo" placeholder="Título de la sección" class="sec-input-title">
+          <textarea [(ngModel)]="sec.contenido" placeholder="Escribe el contenido de esta sección..." rows="3" class="sec-textarea"></textarea>
+        </div>
+
+        <button class="btn-secondary" (click)="agregarSeccion()" style="margin-top: 10px;">➕ Añadir Nueva Sección</button>
+      </div>
+    </div>
+
+    <!-- 3. SECCIÓN COMÚN DE ARCHIVOS Y BOTÓN FINAL -->
+    <div *ngIf="currentMode !== 'menu'">
+      <div *ngIf="currentMode === 'combinar'">
+        <button class="btn-back" (click)="currentMode = 'menu'">⬅️ Volver al Menú</button>
+        <p class="subtitle">Sube y ordena tus archivos para unirlos directamente</p>
+      </div>
+
+      <div class="upload-section" style="margin-top: 20px;">
+        <input type="file" id="fileInput" class="file-input" (change)="onFileSelected($event)" multiple accept=".pdf, .docx, .doc, .xlsx, .xls, image/*">
+        <label for="fileInput" class="upload-label">
+          <span class="upload-icon">📄</span>
+          <span>Haz clic aquí para adjuntar más documentos o imágenes</span>
+        </label>
+      </div>
+
+      <div class="file-list" *ngIf="selectedFiles.length > 0">
+        <div class="file-item" *ngFor="let item of selectedFiles; let i = index">
+          <div class="file-info">
+            <span class="file-name">{{ item.file.name }}</span>
+            <span class="file-size">{{ getFormattedSize(item.file.size) }}</span>
+          </div>
+          <div class="file-actions">
+            <button class="btn-icon" (click)="moveFile(i, 'up')" [disabled]="i === 0">⬆️</button>
+            <button class="btn-icon" (click)="moveFile(i, 'down')" [disabled]="i === selectedFiles.length - 1">⬇️</button>
+            <button class="btn-icon delete" (click)="removeFile(item.id)">🗑️</button>
+          </div>
+        </div>
+      </div>
+
+      <button class="btn-primary" (click)="combineAndDownload()" [disabled]="isProcessing">
+        {{ isProcessing ? '⏳ Procesando documentos...' : '⚡ Generar y Descargar PDF Final' }}
+      </button>
+    </div>
+
   </div>
 </div>
