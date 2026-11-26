@@ -1,6 +1,7 @@
 import { Component, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
+import { TEXTOS } from './textos-defecto';
 
 interface Img {
   file: File;
@@ -33,7 +34,6 @@ export class InformeForm {
     tipoProyecto: 'Cantera',
     nombreProyecto: '',
     solicita: '',
-    realizadoPor: '',
     lugar: '',
     distrito: '',
     provincia: '',
@@ -70,12 +70,36 @@ export class InformeForm {
     ig: '0',
     mds: '',
     och: '',
-    // conclusión
-    conclusion:
-      'El material de préstamo (afirmado) de la Cantera analizada, zarandeado por la malla de 2”, ' +
-      'cumple la mayoría de los requisitos de calidad como material para afirmado por lo que se ' +
-      'recomienda su uso con fines del mantenimiento de dicha vía.',
+    // títulos de sección y textos largos (editables). Valores originales de la plantilla.
+    ...TEXTOS,
   };
+
+  /** Secciones del informe cuyos títulos y textos se pueden editar. */
+  secciones: { nombre: string; titulo: string; bloques: { campo: string; etiqueta: string; filas: number }[] }[] = [
+    { nombre: 'Encabezado del informe', titulo: 'encabezado', bloques: [] },
+    { nombre: '1. Comentarios', titulo: 'tComentarios', bloques: [
+        { campo: 'txtComentarios', etiqueta: 'Texto', filas: 9 } ] },
+    { nombre: '2. Ensayos estándares', titulo: 'tEnsayos', bloques: [
+        { campo: 'txtEnsayosIntro', etiqueta: 'Texto introductorio', filas: 3 },
+        { campo: 'txtEnsayosNormas', etiqueta: 'Lista de normas (una por línea)', filas: 5 } ] },
+    { nombre: '2.1 Ubicación', titulo: 'tUbicacion', bloques: [] },
+    { nombre: '2.1.1 Granulometría y humedad', titulo: 'tGranulometria', bloques: [
+        { campo: 'txtGranulometria', etiqueta: 'Texto de granulometría', filas: 4 },
+        { campo: 'txtClasificacion', etiqueta: 'Clasificación de suelos', filas: 6 },
+        { campo: 'txtGradacion', etiqueta: 'Gradación de los materiales', filas: 9 },
+        { campo: 'txtCurva', etiqueta: 'Curva granulométrica', filas: 5 } ] },
+    { nombre: '2.1.2 Límite líquido y plástico', titulo: 'tLimites', bloques: [
+        { campo: 'txtLimites', etiqueta: 'Límites de consistencia', filas: 9 },
+        { campo: 'txtIndiceGrupo', etiqueta: 'Índice de grupo', filas: 4 } ] },
+    { nombre: '2.1.3 Proctor modificado', titulo: 'tProctor', bloques: [
+        { campo: 'txtProctor', etiqueta: 'Texto', filas: 10 } ] },
+    { nombre: '2.1.4 Manipuleo y colocación', titulo: 'tManipuleo', bloques: [
+        { campo: 'txtManipuleo', etiqueta: 'Texto (las viñetas se escriben con "• ")', filas: 16 } ] },
+    { nombre: '3. Conclusiones y recomendaciones', titulo: 'tConclusiones', bloques: [
+        { campo: 'txtConclusionesIntro', etiqueta: 'Texto antes de las tablas', filas: 6 },
+        { campo: 'conclusion', etiqueta: 'Conclusión', filas: 4 },
+        { campo: 'recomendacion', etiqueta: 'Recomendación', filas: 4 } ] },
+  ];
 
   tiposProyecto = ['Cantera', 'Casa', 'Puente', 'Carretera', 'Otro'];
   gradaciones = ['A-1', 'A-2', 'C', 'D', 'E', 'F'];
@@ -89,6 +113,22 @@ export class InformeForm {
   error = signal('');
 
   constructor(private http: HttpClient) {}
+
+  // ------------------------------------------------------------ textos editables
+
+  valor(campo: string): string {
+    return (this.datos as Record<string, string>)[campo] ?? '';
+  }
+
+  poner(campo: string, v: string): void {
+    (this.datos as Record<string, string>)[campo] = v;
+  }
+
+  restaurarTextos(): void {
+    if (confirm('¿Volver a los textos originales? Se perderán los cambios que hiciste en los textos.')) {
+      Object.assign(this.datos, TEXTOS);
+    }
+  }
 
   // ------------------------------------------------------------ cálculos
 
@@ -202,19 +242,22 @@ export class InformeForm {
       this.error.set('Falta completar: ' + this.faltantes.join(', '));
       return;
     }
+    // Todos los textos viajan en UN solo campo ("datos"): con tantos campos sueltos más las fotos,
+    // el multipart superaba el máximo de partes que acepta Tomcat (50).
+    const texto = new URLSearchParams();
+    Object.entries(this.datos).forEach(([k, v]) => texto.append(k, v ?? ''));
+    texto.append('formato', formato);
+    this.panel.forEach((p, i) => texto.append('panelDesc' + i, p.descripcion));
+
     const fd = new FormData();
-    Object.entries(this.datos).forEach(([k, v]) => fd.append(k, v ?? ''));
-    fd.append('formato', formato);
+    fd.append('datos', texto.toString());
 
     (Object.keys(this.imagenes) as CampoImagen[]).forEach((k) => {
       const img = this.imagenes[k];
       if (img) fd.append(k, img.file, img.file.name);
     });
     this.anexo.forEach((a) => fd.append('anexo', a.file, a.file.name));
-    this.panel.forEach((p) => {
-      fd.append('panel', p.file, p.file.name);
-      fd.append('panelDescripcion', p.descripcion);
-    });
+    this.panel.forEach((p) => fd.append('panel', p.file, p.file.name));
 
     this.error.set('');
     this.mensaje.set('');
