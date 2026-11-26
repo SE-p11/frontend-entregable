@@ -218,3 +218,31 @@ button:disabled {
   background: #e8f7ee;
   color: #1b6b3a;
 }
+
+/* ====== Textos editables por sección ====== */
+.seccion-texto {
+  border: 1px solid var(--borde, #d8dee9);
+  border-radius: 10px;
+  padding: 10px 14px;
+  margin: 10px 0;
+}
+.seccion-texto > summary {
+  cursor: pointer;
+  font-weight: 700;
+  padding: 4px 0;
+}
+.seccion-texto[open] > summary { margin-bottom: 10px; }
+.seccion-texto textarea { width: 100%; box-sizing: border-box; line-height: 1.45; }
+code {
+  background: rgba(127, 127, 127, 0.18);
+  padding: 1px 6px;
+  border-radius: 5px;
+  font-size: 0.85em;
+}
+.campo.fijo .valor-fijo {
+  display: block;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: rgba(127, 127, 127, 0.14);
+  font-weight: 600;
+}

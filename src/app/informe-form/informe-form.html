@@ -38,9 +38,9 @@
       <label class="campo">Solicita
         <input [(ngModel)]="datos.solicita" placeholder="Ej: CONSORCIO SAN JUAN" />
       </label>
-      <label class="campo">Realizado por
-        <input [(ngModel)]="datos.realizadoPor" placeholder="Ej: JKEMSCA S.A.C." />
-      </label>
+      <div class="campo fijo">Realizado por
+        <span class="valor-fijo">JKEMSCA S.A.C.</span>
+      </div>
     </div>
 
     <h4>Ubicación del proyecto</h4>
@@ -211,12 +211,32 @@
     </div>
   </section>
 
-  <!-- 5. CONCLUSIÓN -->
+  <!-- 5. TEXTOS DEL INFORME -->
   <section class="card">
-    <h3>✅ 5. Conclusión</h3>
-    <label class="campo">Texto de la conclusión (puedes editarlo)
-      <textarea rows="5" [(ngModel)]="datos.conclusion"></textarea>
-    </label>
+    <h3>✏️ 5. Textos del informe (editables)</h3>
+    <p class="ayuda">
+      Aquí puedes cambiar los títulos y todos los textos. Cada <b>línea</b> es un párrafo del informe.
+      Los títulos también cambian en el índice. Claves que se reemplazan solas:
+      <code>{{ '{cantera}' }}</code> <code>{{ '{tipo}' }}</code> <code>{{ '{dosificacion}' }}</code>
+      <code>{{ '{zaranda}' }}</code> <code>{{ '{gradacion}' }}</code> <code>{{ '{aashto}' }}</code>
+      <code>{{ '{sucs}' }}</code> <code>{{ '{nombreGrupo}' }}</code> <code>{{ '{ig}' }}</code>
+    </p>
+
+    @for (sec of secciones; track sec.titulo) {
+      <details class="seccion-texto">
+        <summary>{{ sec.nombre }}</summary>
+        <label class="campo">Título
+          <input [ngModel]="valor(sec.titulo)" (ngModelChange)="poner(sec.titulo, $event)" />
+        </label>
+        @for (b of sec.bloques; track b.campo) {
+          <label class="campo">{{ b.etiqueta }}
+            <textarea [rows]="b.filas" [ngModel]="valor(b.campo)" (ngModelChange)="poner(b.campo, $event)"></textarea>
+          </label>
+        }
+      </details>
+    }
+
+    <button type="button" class="btn-sec" (click)="restaurarTextos()">↺ Restaurar textos originales</button>
   </section>
 
   <!-- 6. ANEXO -->
