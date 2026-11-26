@@ -1,0 +1,283 @@
+<div class="informe">
+
+  <!-- 1. PORTADA -->
+  <section class="card">
+    <h3>📝 1. Datos de la portada</h3>
+
+    <label class="campo">Título del informe
+      <input [(ngModel)]="datos.titulo" placeholder="Ej: Análisis de cantera para material granular para afirmado" />
+    </label>
+
+    <div class="fila">
+      <label class="campo">Dosificación
+        <input [(ngModel)]="datos.dosificacion" placeholder="Ej: 1:9" />
+      </label>
+      <label class="campo">Fecha
+        <input type="date" [(ngModel)]="datos.fecha" />
+      </label>
+    </div>
+
+    <label class="campo">Obra
+      <textarea rows="3" [(ngModel)]="datos.obra" placeholder="Nombre completo de la obra"></textarea>
+    </label>
+
+    <div class="fila">
+      <label class="campo">Tipo
+        <select [(ngModel)]="datos.tipoProyecto">
+          @for (t of tiposProyecto; track t) {
+            <option [value]="t">{{ t }}</option>
+          }
+        </select>
+      </label>
+      <label class="campo">Nombre de la cantera / proyecto
+        <input [(ngModel)]="datos.nombreProyecto" placeholder="Ej: YOMISS-PERU" />
+      </label>
+    </div>
+
+    <div class="fila">
+      <label class="campo">Solicita
+        <input [(ngModel)]="datos.solicita" placeholder="Ej: CONSORCIO SAN JUAN" />
+      </label>
+      <label class="campo">Realizado por
+        <input [(ngModel)]="datos.realizadoPor" placeholder="Ej: JKEMSCA S.A.C." />
+      </label>
+    </div>
+
+    <h4>Ubicación del proyecto</h4>
+    <label class="campo">Lugar
+      <input [(ngModel)]="datos.lugar" />
+    </label>
+    <div class="fila tres">
+      <label class="campo">Distrito <input [(ngModel)]="datos.distrito" /></label>
+      <label class="campo">Provincia <input [(ngModel)]="datos.provincia" /></label>
+      <label class="campo">Departamento <input [(ngModel)]="datos.departamento" /></label>
+    </div>
+
+    <h4>Foto de portada</h4>
+    <div class="subida">
+      @if (imagenes.portada; as img) {
+        <img [src]="img.url" alt="Foto de portada" class="previa" />
+        <button type="button" class="btn-sec" (click)="quitarImagen('portada')">Quitar</button>
+      } @else {
+        <label class="btn-sec">📷 Elegir foto
+          <input type="file" accept="image/png,image/jpeg" hidden (change)="onImagen($event, 'portada')" />
+        </label>
+        <span class="ayuda">JPG o PNG. Sale en la portada, junto al nombre de la cantera.</span>
+      }
+    </div>
+  </section>
+
+  <!-- 2. UBICACIÓN DE LA CANTERA -->
+  <section class="card">
+    <h3>📍 2. Ubicación de la cantera</h3>
+    <div class="fila tres">
+      <label class="campo">Departamento <input [(ngModel)]="datos.cantDepartamento" /></label>
+      <label class="campo">Provincia <input [(ngModel)]="datos.cantProvincia" /></label>
+      <label class="campo">Distrito <input [(ngModel)]="datos.cantDistrito" /></label>
+    </div>
+    <label class="campo">Lugar
+      <input [(ngModel)]="datos.cantLugar" placeholder="Ej: Comunidad Campesina San Juan de Orccohuasi" />
+    </label>
+
+    <h4>Coordenadas UTM (WGS-84, zona 18S)</h4>
+    <div class="fila tres">
+      <label class="campo">Punto de referencia
+        <input [(ngModel)]="datos.puntoReferencia" placeholder="Si lo dejas vacío: Cantera + nombre" />
+      </label>
+      <label class="campo">Este <input [(ngModel)]="datos.este" inputmode="decimal" placeholder="578353.28" /></label>
+      <label class="campo">Norte <input [(ngModel)]="datos.norte" inputmode="decimal" placeholder="8551978.79" /></label>
+    </div>
+
+    <h4>Imagen del mapa / ubicación</h4>
+    <div class="subida">
+      @if (imagenes.mapa; as img) {
+        <img [src]="img.url" alt="Mapa" class="previa" />
+        <button type="button" class="btn-sec" (click)="quitarImagen('mapa')">Quitar</button>
+      } @else {
+        <label class="btn-sec">🗺️ Elegir imagen
+          <input type="file" accept="image/png,image/jpeg" hidden (change)="onImagen($event, 'mapa')" />
+        </label>
+        <span class="ayuda">Captura de Google Earth o similar. Se coloca con el globo "Cantera …".</span>
+      }
+    </div>
+  </section>
+
+  <!-- 3. GRANULOMETRÍA Y CLASIFICACIÓN -->
+  <section class="card">
+    <h3>🧪 3. Granulometría y clasificación</h3>
+    <p class="ayuda">Finos, Cu, Cc e IP se calculan solos; si hace falta, los puedes corregir a mano.</p>
+
+    <label class="campo corto">Muestra
+      <input [(ngModel)]="datos.muestra" placeholder="M-1" />
+    </label>
+
+    <div class="fila cuatro">
+      <label class="campo">% Grava
+        <input inputmode="decimal" [ngModel]="datos.grava" (ngModelChange)="datos.grava = $event; recalcular()" />
+      </label>
+      <label class="campo">% Arena
+        <input inputmode="decimal" [ngModel]="datos.arena" (ngModelChange)="datos.arena = $event; recalcular()" />
+      </label>
+      <label class="campo">% Finos <span class="auto">auto</span>
+        <input inputmode="decimal" [(ngModel)]="datos.finos" />
+      </label>
+      <label class="campo">% Humedad
+        <input inputmode="decimal" [(ngModel)]="datos.humedad" />
+      </label>
+    </div>
+
+    <div class="fila cuatro">
+      <label class="campo">D10 (mm)
+        <input inputmode="decimal" [ngModel]="datos.d10" (ngModelChange)="datos.d10 = $event; recalcular()" />
+      </label>
+      <label class="campo">D30 (mm)
+        <input inputmode="decimal" [ngModel]="datos.d30" (ngModelChange)="datos.d30 = $event; recalcular()" />
+      </label>
+      <label class="campo">D60 (mm)
+        <input inputmode="decimal" [ngModel]="datos.d60" (ngModelChange)="datos.d60 = $event; recalcular()" />
+      </label>
+      <label class="campo">Cu <span class="auto">auto</span>
+        <input inputmode="decimal" [(ngModel)]="datos.cu" />
+      </label>
+    </div>
+
+    <div class="fila cuatro">
+      <label class="campo">Cc <span class="auto">auto</span>
+        <input inputmode="decimal" [(ngModel)]="datos.cc" />
+      </label>
+      <label class="campo">AASHTO
+        <input [(ngModel)]="datos.aashto" placeholder="A-1-a(0)" />
+      </label>
+      <label class="campo">SUCS
+        <input [(ngModel)]="datos.sucs" placeholder="GW-GC-GM" />
+      </label>
+      <label class="campo">Índice de grupo (IG)
+        <input inputmode="decimal" [(ngModel)]="datos.ig" />
+      </label>
+    </div>
+
+    <label class="campo">Nombre de grupo (ASTM D-2487)
+      <input [(ngModel)]="datos.nombreGrupo" placeholder="Ej: GRAVA BIEN GRADUADA CON ARCILLA Y LIMO" />
+    </label>
+
+    <div class="fila">
+      <label class="campo">Gradación a la que se aproxima
+        <select [(ngModel)]="datos.gradacion">
+          @for (g of gradaciones; track g) {
+            <option [value]="g">{{ g }}</option>
+          }
+        </select>
+      </label>
+      <label class="campo">Zaranda (malla)
+        <input [(ngModel)]="datos.zaranda" placeholder='2”' />
+      </label>
+    </div>
+
+    <h4>Curva granulométrica</h4>
+    <div class="subida">
+      @if (imagenes.curva; as img) {
+        <img [src]="img.url" alt="Curva granulométrica" class="previa ancha" />
+        <button type="button" class="btn-sec" (click)="quitarImagen('curva')">Quitar</button>
+      } @else {
+        <label class="btn-sec">📈 Elegir imagen
+          <input type="file" accept="image/png,image/jpeg" hidden (change)="onImagen($event, 'curva')" />
+        </label>
+        <span class="ayuda">Imagen del gráfico de la curva (PNG recomendado).</span>
+      }
+    </div>
+  </section>
+
+  <!-- 4. PLASTICIDAD Y PROCTOR -->
+  <section class="card">
+    <h3>📊 4. Límites de consistencia y Proctor</h3>
+    <div class="fila cuatro">
+      <label class="campo">LL %
+        <input inputmode="decimal" [ngModel]="datos.ll" (ngModelChange)="datos.ll = $event; recalcular()" />
+      </label>
+      <label class="campo">LP %
+        <input inputmode="decimal" [ngModel]="datos.lp" (ngModelChange)="datos.lp = $event; recalcular()" />
+      </label>
+      <label class="campo">IP % <span class="auto">auto</span>
+        <input inputmode="decimal" [(ngModel)]="datos.ip" />
+      </label>
+    </div>
+    <div class="fila">
+      <label class="campo">MDS – Máxima densidad seca (gr/cm³)
+        <input inputmode="decimal" [(ngModel)]="datos.mds" placeholder="2.104" />
+      </label>
+      <label class="campo">OCH – Óptimo contenido de humedad (%)
+        <input inputmode="decimal" [(ngModel)]="datos.och" placeholder="7.06" />
+      </label>
+    </div>
+  </section>
+
+  <!-- 5. CONCLUSIÓN -->
+  <section class="card">
+    <h3>✅ 5. Conclusión</h3>
+    <label class="campo">Texto de la conclusión (puedes editarlo)
+      <textarea rows="5" [(ngModel)]="datos.conclusion"></textarea>
+    </label>
+  </section>
+
+  <!-- 6. ANEXO -->
+  <section class="card">
+    <h3>📎 6. Anexo: ensayos de laboratorio</h3>
+    <p class="ayuda">Una imagen por hoja de ensayo; cada una sale en su propia página.</p>
+    <label class="btn-sec">➕ Agregar imágenes
+      <input type="file" accept="image/png,image/jpeg" multiple hidden (change)="onAnexo($event)" />
+    </label>
+
+    <div class="galeria">
+      @for (a of anexo; track a.url; let i = $index) {
+        <div class="item">
+          <img [src]="a.url" [alt]="'Hoja ' + (i + 1)" />
+          <div class="acciones">
+            <button type="button" (click)="mover(anexo, i, -1)" [disabled]="i === 0" title="Subir">◀</button>
+            <span>Hoja {{ i + 1 }}</span>
+            <button type="button" (click)="mover(anexo, i, 1)" [disabled]="i === anexo.length - 1" title="Bajar">▶</button>
+            <button type="button" class="quitar" (click)="quitarAnexo(i)" title="Quitar">✕</button>
+          </div>
+        </div>
+      }
+    </div>
+  </section>
+
+  <!-- 7. PANEL FOTOGRÁFICO -->
+  <section class="card">
+    <h3>📸 7. Panel fotográfico</h3>
+    <p class="ayuda">Todas las fotos que quieras; van de dos en dos por página, con su descripción debajo.</p>
+    <label class="btn-sec">➕ Agregar fotos
+      <input type="file" accept="image/png,image/jpeg" multiple hidden (change)="onPanel($event)" />
+    </label>
+
+    <div class="galeria">
+      @for (p of panel; track p.url; let i = $index) {
+        <div class="item">
+          <img [src]="p.url" [alt]="'Foto ' + (i + 1)" />
+          <input class="desc" [(ngModel)]="p.descripcion" placeholder="Descripción de la foto" />
+          <div class="acciones">
+            <button type="button" (click)="mover(panel, i, -1)" [disabled]="i === 0" title="Subir">◀</button>
+            <span>Foto {{ i + 1 }}</span>
+            <button type="button" (click)="mover(panel, i, 1)" [disabled]="i === panel.length - 1" title="Bajar">▶</button>
+            <button type="button" class="quitar" (click)="quitarPanel(i)" title="Quitar">✕</button>
+          </div>
+        </div>
+      }
+    </div>
+  </section>
+
+  <!-- GENERAR -->
+  <section class="card generar">
+    @if (error()) { <p class="msg error">{{ error() }}</p> }
+    @if (mensaje()) { <p class="msg ok">{{ mensaje() }}</p> }
+
+    <div class="botones">
+      <button type="button" class="btn-pri" [disabled]="cargando()" (click)="generar('pdf')">
+        {{ cargando() ? 'Generando…' : '📄 Generar PDF' }}
+      </button>
+      <button type="button" class="btn-sec" [disabled]="cargando()" (click)="generar('docx')">
+        📝 Descargar Word
+      </button>
+    </div>
+  </section>
+</div>
