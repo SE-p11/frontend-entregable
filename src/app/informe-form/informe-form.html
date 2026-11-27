@@ -9,9 +9,11 @@
     </label>
 
     <div class="fila">
-      <label class="campo">Dosificación
-        <input [(ngModel)]="datos.dosificacion" placeholder="Ej: 1:9" />
-      </label>
+      @if (!esEms) {
+        <label class="campo">Dosificación
+          <input [(ngModel)]="datos.dosificacion" placeholder="Ej: 1:9" />
+        </label>
+      }
       <label class="campo">Fecha
         <input type="date" [(ngModel)]="datos.fecha" />
       </label>
@@ -22,17 +24,35 @@
     </label>
 
     <div class="fila">
-      <label class="campo">Tipo
-        <select [(ngModel)]="datos.tipoProyecto">
+      <label class="campo">Tipo de proyecto
+        <select [ngModel]="tipoSel" (ngModelChange)="cambiarTipo($event)">
           @for (t of tiposProyecto; track t) {
             <option [value]="t">{{ t }}</option>
           }
         </select>
       </label>
-      <label class="campo">Nombre de la cantera / proyecto
+      <label class="campo">Nombre del proyecto ({{ tipoNombre || 'tipo' }})
         <input [(ngModel)]="datos.nombreProyecto" placeholder="Ej: YOMISS-PERU" />
       </label>
     </div>
+
+    @if (tipoSel === 'Otro') {
+      <label class="campo">¿Qué tipo de proyecto es? (obligatorio)
+        <input [ngModel]="tipoOtro" (ngModelChange)="cambiarTipoOtro($event)"
+               placeholder="Ej: Reservorio, Colegio, Canal, Muro de contención..." />
+      </label>
+    }
+
+    <label class="campo">Modelo de informe
+      <select [ngModel]="datos.modelo" (ngModelChange)="cambiarModelo($event)">
+        <option value="material">Control de calidad de material (afirmado / base)</option>
+        <option value="cimentacion">Estudio de suelos para cimentación (EMS, Norma E.050)</option>
+      </select>
+      <span class="ayuda">
+        Se elige solo según el tipo de proyecto, pero puedes cambiarlo. El modelo de material incluye Proctor,
+        manipuleo y requisitos de afirmado; el de cimentación incluye perfil estratigráfico y capacidad portante.
+      </span>
+    </label>
 
     <div class="fila">
       <label class="campo">Solicita
@@ -62,14 +82,14 @@
         <label class="btn-sec">📷 Elegir foto
           <input type="file" accept="image/png,image/jpeg" hidden (change)="onImagen($event, 'portada')" />
         </label>
-        <span class="ayuda">JPG o PNG. Sale en la portada, junto al nombre de la cantera.</span>
+        <span class="ayuda">JPG o PNG. Sale en la portada, junto al nombre del proyecto.</span>
       }
     </div>
   </section>
 
-  <!-- 2. UBICACIÓN DE LA CANTERA -->
+  <!-- 2. UBICACIÓN -->
   <section class="card">
-    <h3>📍 2. Ubicación de la cantera</h3>
+    <h3>📍 2. Ubicación — {{ tipoNombre || 'proyecto' }}</h3>
     <div class="fila tres">
       <label class="campo">Departamento <input [(ngModel)]="datos.cantDepartamento" /></label>
       <label class="campo">Provincia <input [(ngModel)]="datos.cantProvincia" /></label>
@@ -82,7 +102,7 @@
     <h4>Coordenadas UTM (WGS-84, zona 18S)</h4>
     <div class="fila tres">
       <label class="campo">Punto de referencia
-        <input [(ngModel)]="datos.puntoReferencia" placeholder="Si lo dejas vacío: Cantera + nombre" />
+        <input [(ngModel)]="datos.puntoReferencia" [placeholder]="'Si lo dejas vacío: ' + (tipoNombre || 'Tipo') + ' + nombre'" />
       </label>
       <label class="campo">Este <input [(ngModel)]="datos.este" inputmode="decimal" placeholder="578353.28" /></label>
       <label class="campo">Norte <input [(ngModel)]="datos.norte" inputmode="decimal" placeholder="8551978.79" /></label>
@@ -97,7 +117,7 @@
         <label class="btn-sec">🗺️ Elegir imagen
           <input type="file" accept="image/png,image/jpeg" hidden (change)="onImagen($event, 'mapa')" />
         </label>
-        <span class="ayuda">Captura de Google Earth o similar. Se coloca con el globo "Cantera …".</span>
+        <span class="ayuda">Captura de Google Earth o similar. Se coloca con un globo con el tipo y el nombre del proyecto.</span>
       }
     </div>
   </section>
@@ -151,27 +171,31 @@
       <label class="campo">SUCS
         <input [(ngModel)]="datos.sucs" placeholder="GW-GC-GM" />
       </label>
-      <label class="campo">Índice de grupo (IG)
-        <input inputmode="decimal" [(ngModel)]="datos.ig" />
-      </label>
+      @if (!esEms) {
+        <label class="campo">Índice de grupo (IG)
+          <input inputmode="decimal" [(ngModel)]="datos.ig" />
+        </label>
+      }
     </div>
 
     <label class="campo">Nombre de grupo (ASTM D-2487)
       <input [(ngModel)]="datos.nombreGrupo" placeholder="Ej: GRAVA BIEN GRADUADA CON ARCILLA Y LIMO" />
     </label>
 
-    <div class="fila">
-      <label class="campo">Gradación a la que se aproxima
-        <select [(ngModel)]="datos.gradacion">
-          @for (g of gradaciones; track g) {
-            <option [value]="g">{{ g }}</option>
-          }
-        </select>
-      </label>
-      <label class="campo">Zaranda (malla)
-        <input [(ngModel)]="datos.zaranda" placeholder='2”' />
-      </label>
-    </div>
+    @if (!esEms) {
+      <div class="fila">
+        <label class="campo">Gradación a la que se aproxima
+          <select [(ngModel)]="datos.gradacion">
+            @for (g of gradaciones; track g) {
+              <option [value]="g">{{ g }}</option>
+            }
+          </select>
+        </label>
+        <label class="campo">Zaranda (malla)
+          <input [(ngModel)]="datos.zaranda" placeholder='2”' />
+        </label>
+      </div>
+    }
 
     <h4>Curva granulométrica</h4>
     <div class="subida">
@@ -187,9 +211,9 @@
     </div>
   </section>
 
-  <!-- 4. PLASTICIDAD Y PROCTOR -->
+  <!-- 4. PLASTICIDAD, PROCTOR Y RESULTADOS OPCIONALES -->
   <section class="card">
-    <h3>📊 4. Límites de consistencia y Proctor</h3>
+    <h3>📊 4. {{ esEms ? 'Límites de consistencia' : 'Límites de consistencia y Proctor' }}</h3>
     <div class="fila cuatro">
       <label class="campo">LL %
         <input inputmode="decimal" [ngModel]="datos.ll" (ngModelChange)="datos.ll = $event; recalcular()" />
@@ -201,25 +225,92 @@
         <input inputmode="decimal" [(ngModel)]="datos.ip" />
       </label>
     </div>
-    <div class="fila">
-      <label class="campo">MDS – Máxima densidad seca (gr/cm³)
-        <input inputmode="decimal" [(ngModel)]="datos.mds" placeholder="2.104" />
-      </label>
-      <label class="campo">OCH – Óptimo contenido de humedad (%)
-        <input inputmode="decimal" [(ngModel)]="datos.och" placeholder="7.06" />
-      </label>
-    </div>
+
+    @if (!esEms) {
+      <div class="fila">
+        <label class="campo">MDS – Máxima densidad seca (gr/cm³)
+          <input inputmode="decimal" [(ngModel)]="datos.mds" placeholder="2.104" />
+        </label>
+        <label class="campo">OCH – Óptimo contenido de humedad (%)
+          <input inputmode="decimal" [(ngModel)]="datos.och" placeholder="7.06" />
+        </label>
+      </div>
+
+      <h4>Resultados opcionales (requisitos EG-2013 para afirmado)</h4>
+      <p class="ayuda">Si dejas un campo vacío, esa fila no aparece en el informe.</p>
+      <div class="fila">
+        <label class="campo">CBR al 100% de la MDS, penetración 0.1″ (%) — requisito: 40% mín
+          <input inputmode="decimal" [(ngModel)]="datos.cbr" />
+        </label>
+        <label class="campo">Abrasión Los Ángeles (%) — requisito: 50% máx
+          <input inputmode="decimal" [(ngModel)]="datos.abrasion" />
+        </label>
+      </div>
+    }
   </section>
+
+  @if (esEms) {
+    <section class="card">
+      <h3>🏗️ 4b. Capacidad portante y asentamientos</h3>
+      <p class="ayuda">
+        El sistema no calcula la capacidad portante: escribe aquí los resultados de tu cálculo.
+        Los campos que dejes vacíos no aparecen en la tabla del informe.
+      </p>
+      <div class="fila">
+        <label class="campo">Profundidad de exploración (m)
+          <input inputmode="decimal" [(ngModel)]="datos.profCalicata" />
+        </label>
+        <label class="campo">Nivel freático
+          <input [(ngModel)]="datos.nivelFreatico" placeholder="Ej: No se encontró hasta 3.00 m" />
+        </label>
+      </div>
+      <label class="campo">Método de cálculo
+        <input list="metodos-capacidad" [(ngModel)]="datos.metodoCapacidad" />
+        <datalist id="metodos-capacidad">
+          <option value="Terzaghi"></option>
+          <option value="Meyerhof"></option>
+          <option value="Vesic"></option>
+          <option value="Hansen"></option>
+        </datalist>
+      </label>
+      <div class="fila cuatro">
+        <label class="campo">Df – Profundidad de cimentación (m)
+          <input inputmode="decimal" [(ngModel)]="datos.df" />
+        </label>
+        <label class="campo">B – Ancho de cimentación (m)
+          <input inputmode="decimal" [(ngModel)]="datos.anchoB" />
+        </label>
+        <label class="campo">γ – Peso unitario (g/cm³)
+          <input inputmode="decimal" [(ngModel)]="datos.gamma" />
+        </label>
+        <label class="campo">c – Cohesión (kg/cm²)
+          <input inputmode="decimal" [(ngModel)]="datos.cohesion" />
+        </label>
+      </div>
+      <div class="fila cuatro">
+        <label class="campo">φ – Ángulo de fricción (°)
+          <input inputmode="decimal" [(ngModel)]="datos.phi" />
+        </label>
+        <label class="campo">qadm – Capacidad portante admisible (kg/cm²)
+          <input inputmode="decimal" [(ngModel)]="datos.qadm" />
+        </label>
+        <label class="campo">Asentamiento estimado (cm)
+          <input inputmode="decimal" [(ngModel)]="datos.asentamiento" />
+        </label>
+      </div>
+    </section>
+  }
 
   <!-- 5. TEXTOS DEL INFORME -->
   <section class="card">
     <h3>✏️ 5. Textos del informe (editables)</h3>
     <p class="ayuda">
       Aquí puedes cambiar los títulos y todos los textos. Cada <b>línea</b> es un párrafo del informe.
-      Los títulos también cambian en el índice. Claves que se reemplazan solas:
-      <code>{{ '{cantera}' }}</code> <code>{{ '{tipo}' }}</code> <code>{{ '{dosificacion}' }}</code>
-      <code>{{ '{zaranda}' }}</code> <code>{{ '{gradacion}' }}</code> <code>{{ '{aashto}' }}</code>
-      <code>{{ '{sucs}' }}</code> <code>{{ '{nombreGrupo}' }}</code> <code>{{ '{ig}' }}</code>
+      Los títulos también cambian en el índice. Si escribes una de estas claves, el sistema la reemplaza
+      por el dato que ingresaste arriba (si falta, sale «—»):
+      @for (c of claves; track c) {
+        <code>{{ c }}</code>{{ ' ' }}
+      }
     </p>
 
     @for (sec of secciones; track sec.titulo) {
